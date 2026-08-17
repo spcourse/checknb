@@ -40,6 +40,22 @@ setup(
         # depend on it, and without it every run dies with "No such kernel".
         "ipykernel>=6.0",
     ],
+    # The kernel is launched from the ipykernel kernelspec inside *this*
+    # environment, so a notebook's own imports only resolve if they are
+    # installed here too. These extras exist to make that one command.
+    #
+    # ⚠️ These pins duplicate spcourse/requirements.txt, which is the canonical
+    # list and carries the reasoning. Update both.
+    extras_require={
+        # Data Processing: the four pandas notebooks. jupyterlab is deliberately
+        # absent -- that is for opening a notebook by hand; checknb only needs a
+        # kernel, and ipykernel is already a hard dependency above.
+        "dp": [
+            "pandas>=3.0,<4",  # pandas 3 required: notebook 1 asserts the `str` dtype
+            "numpy>=2.0,<3",  # imported directly by the notebooks' tests.py
+            "matplotlib>=3.9",  # notebook 1 chapter 4, and the pandas .plot accessor
+        ],
+    },
     entry_points={
         "console_scripts": [
             "checknb = checknb.cli:main",

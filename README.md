@@ -20,6 +20,38 @@ Or, from a clone, for development:
 pip install -e .
 ```
 
+### Install the notebook's dependencies too
+
+checknb runs the notebook through the ipykernel kernelspec inside **its own
+environment**, so the notebook's imports only resolve if they are installed
+alongside checknb. The `dp` extra pulls in what the Data Processing notebooks
+need (pandas, numpy, matplotlib):
+
+```
+pip install "checknb[dp] @ git+https://github.com/spcourse/checknb.git"
+```
+
+Which makes a throwaway run a single command — no venv to create or clean up.
+From a clone:
+
+```
+uvx --from '/path/to/checknb[dp]' checknb --cell-timeout 60 notebook-1-foundations.ipynb
+```
+
+or straight from the remote:
+
+```
+uvx --from 'checknb[dp] @ git+https://github.com/spcourse/checknb.git' checknb --cell-timeout 60 notebook-1-foundations.ipynb
+```
+
+Without the extra you have to supply the deps yourself, e.g.
+`uvx --with-requirements requirements.txt ...`. Installing checknb bare into an
+environment that already has the notebook's deps — the usual case when grading —
+needs neither.
+
+> The `dp` pins duplicate `spcourse/requirements.txt`, which is the canonical
+> list and explains *why* each one is pinned. Update both.
+
 ## Use
 
 ```
@@ -82,4 +114,9 @@ those points for a human or a program.
 
 Python 3.11+, plus `nbconvert` and `ipykernel` (installed automatically). The
 notebook's own dependencies — pandas, matplotlib, whatever it imports — must be
-present in the environment the kernel runs in.
+present in the environment the kernel runs in, which is the environment checknb
+itself is installed in. See [the `dp` extra](#install-the-notebooks-dependencies-too).
+
+Raise `--cell-timeout` when running in a cold environment. `import pandas` alone
+can exceed the 3-second default the first time, and an interrupted import cell
+makes every test below it fail with a misleading `name 'test_1' is not defined`.
