@@ -10,6 +10,8 @@ from __future__ import annotations
 import json
 import sys
 
+from ._version import __version__
+
 
 class Colors:
     PASS = "\033[92m"

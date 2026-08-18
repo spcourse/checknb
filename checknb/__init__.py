@@ -9,6 +9,7 @@ Three steps, one per module, usable separately:
 The command-line front end lives in `cli` and is installed as `checknb`.
 """
 
+from ._version import __version__
 from .execute import DEFAULT_OUTPUT, ExecutionError, execute_notebook
 from .report import build_report, pprint, render_json, render_lines
 from .score import (
@@ -21,9 +22,8 @@ from .score import (
     score_notebook,
 )
 
-__version__ = "0.1.3"
-
 __all__ = [
+    "__version__",
     "DEFAULT_OUTPUT",
     "ExecutionError",
     "build_report",

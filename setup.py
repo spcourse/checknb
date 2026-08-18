@@ -14,10 +14,10 @@ HERE = Path(__file__).parent
 
 
 def read_version() -> str:
-    source = (HERE / "checknb" / "__init__.py").read_text()
+    source = (HERE / "checknb" / "_version.py").read_text()
     match = re.search(r'^__version__ = "([^"]+)"', source, re.MULTILINE)
     if not match:
-        raise RuntimeError("no __version__ in checknb/__init__.py")
+        raise RuntimeError("no __version__ in checknb/_version.py")
     return match.group(1)
 
 
