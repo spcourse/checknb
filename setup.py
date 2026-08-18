@@ -54,6 +54,14 @@ setup(
             "pandas>=3.0,<4",  # pandas 3 required: notebook 1 asserts the `str` dtype
             "numpy>=2.0,<3",  # imported directly by the notebooks' tests.py
             "matplotlib>=3.9",  # notebook 1 chapter 4, and the pandas .plot accessor
+            # ⚠️ Not optional, and the failure is silent-looking. Every DP notebook
+            # downloads its own data AND its tests.py with pooch, in the second code
+            # cell. Without pooch the first cell dies on `import pooch`, that cell
+            # never runs, and every test then fails with "name 'test_N' is not
+            # defined" -- which reads like a broken notebook, not a missing package.
+            # tqdm is what `progressbar=True` needs.
+            "pooch>=1.8",
+            "tqdm>=4.60",
         ],
     },
     entry_points={
