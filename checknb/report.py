@@ -84,8 +84,12 @@ def _summary(results: list[dict]) -> str:
 
 def pprint(results: list[dict], name: str, color: bool | None = None) -> None:
     """Print the human report. Colour defaults to on only when stdout is a tty."""
+    # bool() is not redundant: typeshed types sys.stdout as `TextIO | Any`, so
+    # isatty() comes back as `bool | Any`, and assigning that into a parameter
+    # declared `bool | None` leaves the None in place as far as a type checker is
+    # concerned. The call always returns a real bool at runtime.
     if color is None:
-        color = sys.stdout.isatty()
+        color = bool(sys.stdout.isatty())
     print("\n".join(render_lines(results, name, color=color)))
 
 
