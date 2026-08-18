@@ -17,6 +17,7 @@ from __future__ import annotations
 import os
 import signal
 import subprocess
+import sys
 from pathlib import Path
 
 DEFAULT_OUTPUT = "./.tmp.ipynb"
@@ -43,8 +44,19 @@ def execute_notebook(
         raise ExecutionError(f"no such notebook: {notebook}")
     out_path.parent.mkdir(parents=True, exist_ok=True)
 
+    # `sys.executable -m nbconvert`, never a bare "jupyter" off PATH. The kernel
+    # nbconvert starts comes from the environment nbconvert itself runs in, so
+    # PATH resolution decides which Python grades the notebook.
+    #
+    # `uvx` prepends its environment's bin to PATH and a bare "jupyter" happens to
+    # work; `uv tool install` exposes only the `checknb` entry point, so the same
+    # bare "jupyter" silently finds some *other* jupyter -- a conda base env, say --
+    # and the notebook is graded against that interpreter's packages instead of the
+    # ones installed alongside checknb. Going through sys.executable removes PATH
+    # from the question entirely.
     cmd = [
-        "jupyter",
+        sys.executable,
+        "-m",
         "nbconvert",
         "--to",
         "notebook",
@@ -61,6 +73,19 @@ def execute_notebook(
         **os.environ,
         "MPLBACKEND": "Agg",  # plt.show() must not block
         "PYDEVD_DISABLE_FILE_VALIDATION": "1",  # silence the debugger warning
+        # The ipykernel wheel ships a kernelspec whose argv[0] is the bare string
+        # "python", resolved through PATH when the kernel starts -- so PATH, not
+        # sys.executable, decides which interpreter actually runs the notebook.
+        # Putting our own bin directory first makes that "python" us.
+        #
+        # Without this the kernel is whatever `python` the shell finds (a conda
+        # base env, typically). The notebook is then graded against that
+        # interpreter's packages, so anything installed alongside checknb -- the
+        # whole point of the `dp` extra -- is simply absent, and every test
+        # reports "name 'test_N' is not defined".
+        "PATH": os.pathsep.join(
+            [str(Path(sys.executable).parent), os.environ.get("PATH", "")]
+        ),
     }
 
     # cwd = the notebook's own directory, so relative paths like
