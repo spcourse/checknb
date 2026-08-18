@@ -115,6 +115,7 @@ def build_report(
         "timeouts": timeouts or [],
         "output": render_lines(results, name, color=True),
         "results": results,
+        "checknb_version": __version__,
     }
 
 
